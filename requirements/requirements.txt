@@ -1,0 +1,7 @@
+pandas
+scikit-learn
+requests
+kagglehub[pandas-datasets]
+openai
+fastapi
+uvicorn

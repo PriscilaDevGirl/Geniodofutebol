@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: genio-do-futebol-api
+    runtime: python
+    buildCommand: pip install -r requirements/requirements.txt
+    startCommand: uvicorn src.app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: BETSAPI_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ENABLE_OPENAI_ANALYSIS
+        value: "1"
+      - key: OPENAI_CHAT_MODEL
+        value: gpt-4.1-mini
+      - key: DATA_SOURCE
+        value: local
+      - key: FRONTEND_ORIGINS
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_API_VERSION
+        value: v23.0

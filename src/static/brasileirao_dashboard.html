@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEURO-BIT | Brasileirao</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">NEURO-BIT</p>
+        <h1>Painel do Brasileirao</h1>
+        <p class="hero-text">
+          Acompanhe os times do Brasileirao de forma simples, veja quem esta ao vivo,
+          quem joga hoje, proximos jogos, posicoes e abra a analise com um clique.
+        </p>
+      </div>
+      <div class="hero-panel">
+        <div class="pulse-dot"></div>
+        <div class="hero-panel-copy">
+          <span id="br-status-pill">Carregando</span>
+          <small id="br-last-sync">Buscando dados do painel</small>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="summary-strip">
+        <article class="summary-card">
+          <span class="summary-label">Ao Vivo</span>
+          <strong id="live-count">-</strong>
+          <p>Times com partida ao vivo agora.</p>
+        </article>
+        <article class="summary-card">
+          <span class="summary-label">Jogam Hoje</span>
+          <strong id="upcoming-count">-</strong>
+          <p>Times com jogo programado para hoje.</p>
+        </article>
+        <article class="summary-card">
+          <span class="summary-label">Ultimos Jogos</span>
+          <strong id="ended-count">-</strong>
+          <p>Times sem jogo ao vivo, mas com historico recente.</p>
+        </article>
+        <article class="summary-card">
+          <span class="summary-label">Acesso Rapido</span>
+          <strong>Chat + Analise</strong>
+          <p>Clique em um card para abrir a leitura do time.</p>
+        </article>
+      </section>
+
+      <section class="panel-card">
+        <div class="card-header">
+          <h2>Atalhos</h2>
+        </div>
+        <div class="quick-prompts">
+          <a class="ghost-button" href="/dashboard">Abrir dashboard analitico</a>
+          <button id="refresh-board" class="ghost-button" type="button">Atualizar painel</button>
+          <button class="ghost-button team-shortcut" data-team="Flamengo" type="button">Flamengo</button>
+          <button class="ghost-button team-shortcut" data-team="Palmeiras" type="button">Palmeiras</button>
+          <button class="ghost-button team-shortcut" data-team="Corinthians" type="button">Corinthians</button>
+          <button class="ghost-button team-shortcut" data-team="Vasco" type="button">Vasco</button>
+        </div>
+      </section>
+
+      <section class="panel-card">
+        <div class="card-header">
+          <h2>Times do Brasileirao</h2>
+        </div>
+        <div id="brasileirao-board" class="board-grid">
+          <p class="empty-state">Carregando painel dos times...</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/brasileirao_dashboard.js"></script>
+</body>
+</html>

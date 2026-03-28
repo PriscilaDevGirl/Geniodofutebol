@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEURO-BIT Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">NEURO-BIT</p>
+        <h1>Dashboard de Analise Preditiva</h1>
+        <p class="hero-text">
+          Consulte times, confrontos ou oportunidades ao vivo e veja a leitura do modelo em cards visuais,
+          com risco, edge, Zen-Guard e narrativa estilo comentarista.
+        </p>
+      </div>
+      <div class="hero-panel">
+        <div class="pulse-dot"></div>
+        <div class="hero-panel-copy">
+          <span id="api-status-pill">API pronta</span>
+          <small id="last-sync-label">Aguardando primeira consulta</small>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="summary-strip">
+        <article class="summary-card">
+          <span class="summary-label">Leitura Atual</span>
+          <strong id="summary-headline">Sem analise no momento</strong>
+          <p id="summary-detail">Use um prompt ou informe um confronto para iniciar.</p>
+        </article>
+
+        <article class="summary-card">
+          <span class="summary-label">Risco</span>
+          <strong id="summary-risk">Aguardando</strong>
+          <p id="summary-risk-detail">Zen-Guard e contexto de cautela aparecem aqui.</p>
+        </article>
+
+        <article class="summary-card">
+          <span class="summary-label">Melhor Edge</span>
+          <strong id="summary-edge">-</strong>
+          <p id="summary-edge-detail">A maior vantagem identificada no snapshot ou na mesa.</p>
+        </article>
+
+        <article class="summary-card">
+          <span class="summary-label">Auto Refresh</span>
+          <strong id="summary-refresh">Desligado</strong>
+          <p id="summary-refresh-detail">Defina um intervalo para acompanhar o ao vivo.</p>
+        </article>
+      </section>
+
+      <section class="control-panel">
+        <div class="panel-card search-card">
+          <label for="message-input">Pergunta do usuario</label>
+          <textarea id="message-input" rows="4" placeholder="Ex: quero analisar Vasco x Flamengo ou quais sao as melhores oportunidades ao vivo?"></textarea>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="event-id-input">Event ID opcional</label>
+              <input id="event-id-input" type="text" placeholder="Ex: 11523219">
+            </div>
+            <div class="field">
+              <label for="profile-select">Perfil do usuario</label>
+              <select id="profile-select">
+                <option value="iniciante">Iniciante</option>
+                <option value="conservador">Conservador</option>
+                <option value="agressivo">Agressivo</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <button id="analyze-button" class="primary-button">Gerar Analise</button>
+            </div>
+          </div>
+
+          <div class="auto-refresh-row">
+            <label class="toggle-field" for="auto-refresh-toggle">
+              <input id="auto-refresh-toggle" type="checkbox">
+              <span>Atualizar dashboard automaticamente</span>
+            </label>
+            <div class="field interval-field">
+              <label for="refresh-interval-input">Intervalo</label>
+              <input id="refresh-interval-input" type="number" min="5" step="5" value="20">
+            </div>
+            <div class="refresh-status-wrap">
+              <span id="auto-refresh-status" class="refresh-status">Auto refresh desligado</span>
+            </div>
+          </div>
+
+          <div class="quick-prompts">
+            <button class="ghost-button prompt-chip" data-prompt="quero analise do jogo do Vasco">Vasco</button>
+            <button class="ghost-button prompt-chip" data-prompt="analisa Flamengo x Palmeiras">Confronto</button>
+            <button class="ghost-button prompt-chip" data-prompt="quais sao as melhores oportunidades ao vivo?">Oportunidades</button>
+            <button class="ghost-button prompt-chip" data-prompt="esse jogo esta arriscado?">Risco</button>
+            <button id="compare-profiles-button" class="ghost-button prompt-chip" type="button">Comparar Perfis</button>
+          </div>
+        </div>
+
+        <div class="panel-card response-card">
+          <div class="card-header">
+            <h2>Resposta do Assistente</h2>
+            <button id="load-board-button" class="ghost-button">Atualizar Mesa</button>
+          </div>
+          <pre id="reply-output">Use um prompt acima para carregar a analise.</pre>
+          <div id="quick-actions" class="quick-actions"></div>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="metric-card spotlight">
+          <div class="card-header">
+            <h2>Mercado Principal</h2>
+            <span id="market-probability" class="metric-badge">-</span>
+          </div>
+          <p id="market-label" class="metric-title">Aguardando analise</p>
+          <div id="market-confidence-bar"></div>
+          <p id="market-decision" class="metric-text">O mercado principal e a decisao aparecem aqui.</p>
+        </article>
+
+        <article class="metric-card">
+          <div class="card-header">
+            <h2>Jogo e Perfil</h2>
+            <span id="score-badge" class="metric-badge subtle">-</span>
+          </div>
+          <p id="game-title" class="metric-title">Nenhum jogo carregado</p>
+          <p id="game-context" class="metric-text">Placar, minuto e status da API.</p>
+        </article>
+
+        <article class="metric-card">
+          <div class="card-header">
+            <h2>Zen-Guard</h2>
+            <span id="zen-status" class="metric-badge subtle">-</span>
+          </div>
+          <p id="zen-action" class="metric-title">Sem leitura de risco</p>
+          <p id="zen-reason" class="metric-text">A recomendacao de cautela aparece aqui.</p>
+        </article>
+
+        <article class="metric-card">
+          <div class="card-header">
+            <h2>Tilt e Torcida</h2>
+            <span id="tilt-level" class="metric-badge subtle">-</span>
+          </div>
+          <p id="crowd-mood" class="metric-title">Sem sentimento calculado</p>
+          <p id="tilt-text" class="metric-text">Analise emocional do momento do jogo.</p>
+        </article>
+      </section>
+
+      <section class="insights-grid">
+        <article class="panel-card">
+          <div class="card-header">
+            <h2>XAI</h2>
+          </div>
+          <ul id="xai-list" class="insight-list">
+            <li>Aguardando sinais do modelo.</li>
+          </ul>
+        </article>
+
+        <article class="panel-card">
+          <div class="card-header">
+            <h2>Narrativa</h2>
+          </div>
+          <p id="narrative-text" class="long-copy">A narrativa estilo comentarista aparece aqui.</p>
+        </article>
+      </section>
+
+      <section class="panel-card">
+        <div class="card-header">
+          <h2>Relatorio Profissional</h2>
+          <div class="report-toolbar">
+            <label class="toggle-field compact-toggle" for="report-hide-unavailable">
+              <input id="report-hide-unavailable" type="checkbox" checked>
+              <span>Ocultar "nao disponivel"</span>
+            </label>
+          </div>
+        </div>
+        <div id="structured-report" class="report-grid">
+          <article class="report-card">
+            <h3>Aguardando analise</h3>
+            <ul class="report-list">
+              <li>Os 12 blocos da leitura profissional aparecem aqui depois da consulta.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel-card">
+        <div class="card-header">
+          <h2>Probabilidades por Mercado</h2>
+        </div>
+        <div id="markets-grid" class="markets-grid">
+          <p class="empty-state">Nenhuma probabilidade calculada ainda.</p>
+        </div>
+      </section>
+
+      <section class="panel-card">
+        <div class="card-header">
+          <h2>Comparador de Perfis</h2>
+        </div>
+        <div id="profile-comparison" class="comparison-grid">
+          <article class="compare-tile">
+            <h3>Iniciante</h3>
+            <p class="empty-state">Use "Comparar Perfis" para ver a mesma analise nos tres estilos.</p>
+          </article>
+          <article class="compare-tile">
+            <h3>Conservador</h3>
+            <p class="empty-state">A leitura conservadora aparece aqui.</p>
+          </article>
+          <article class="compare-tile">
+            <h3>Agressivo</h3>
+            <p class="empty-state">A leitura agressiva aparece aqui.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel-card">
+        <div class="card-header">
+          <h2>Top Oportunidades</h2>
+        </div>
+        <div id="board-summary" class="board-summary">
+          <article class="summary-inline-card">
+            <span>Jogos monitorados</span>
+            <strong>-</strong>
+          </article>
+          <article class="summary-inline-card">
+            <span>Valor positivo</span>
+            <strong>-</strong>
+          </article>
+          <article class="summary-inline-card">
+            <span>Edge medio</span>
+            <strong>-</strong>
+          </article>
+          <article class="summary-inline-card">
+            <span>Zen-Guard dominante</span>
+            <strong>-</strong>
+          </article>
+        </div>
+        <div id="opportunity-board" class="board-grid">
+          <p class="empty-state">A mesa de oportunidades sera exibida aqui.</p>
+        </div>
+      </section>
+
+      <section class="panel-card">
+        <div class="card-header">
+          <h2>Historico da Sessao</h2>
+        </div>
+        <div id="analysis-history" class="history-list">
+          <p class="empty-state">As ultimas leituras ficam registradas aqui para comparacao rapida.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>

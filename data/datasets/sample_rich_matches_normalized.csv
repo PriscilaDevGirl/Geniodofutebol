@@ -1,0 +1,4 @@
+match_date,league_name,home_team,away_team,home_goals,away_goals,goal_diff,total_goals,goal_diff_abs,is_draw,home_clean_sheet,away_clean_sheet,home_scored,away_scored,result
+2026-03-20,Brasileirao,Vasco,Flamengo,2,1,1,3,1,0,0,0,1,1,2-1
+2026-03-21,Brasileirao,Palmeiras,Corinthians,1,1,0,2,0,1,0,0,1,1,1 x 1
+2026-03-22,Copa do Brasil,Santos,Sao Paulo,0,2,-2,2,2,0,0,1,0,1,FT 0:2

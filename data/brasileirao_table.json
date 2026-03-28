@@ -1,0 +1,30 @@
+{
+  "season": 2026,
+  "updated_at": "2026-03-28",
+  "source": {
+    "label": "CBF - Tabela oficial Serie A 2026",
+    "url": "https://www.cbf.com.br/futebol-brasileiro/tabelas/campeonato-brasileiro/serie-a/2026"
+  },
+  "teams": [
+    { "team_key": "palmeiras", "team_name": "Palmeiras", "position": 1, "points": 19, "games_played": 8, "wins": 6, "draws": 1, "losses": 1, "goals_for": 17, "goals_against": 8, "goal_diff": 9, "form": "" },
+    { "team_key": "sao paulo", "team_name": "Sao Paulo", "position": 2, "points": 16, "games_played": 8, "wins": 5, "draws": 1, "losses": 2, "goals_for": 10, "goals_against": 5, "goal_diff": 5, "form": "" },
+    { "team_key": "fluminense", "team_name": "Fluminense", "position": 3, "points": 16, "games_played": 8, "wins": 5, "draws": 1, "losses": 2, "goals_for": 13, "goals_against": 9, "goal_diff": 4, "form": "" },
+    { "team_key": "flamengo", "team_name": "Flamengo", "position": 4, "points": 14, "games_played": 7, "wins": 4, "draws": 2, "losses": 1, "goals_for": 13, "goals_against": 5, "goal_diff": 8, "form": "" },
+    { "team_key": "bahia", "team_name": "Bahia", "position": 5, "points": 14, "games_played": 7, "wins": 4, "draws": 2, "losses": 1, "goals_for": 9, "goals_against": 7, "goal_diff": 2, "form": "" },
+    { "team_key": "athletico paranaense", "team_name": "Athletico Paranaense", "position": 6, "points": 13, "games_played": 7, "wins": 4, "draws": 1, "losses": 2, "goals_for": 10, "goals_against": 7, "goal_diff": 3, "form": "" },
+    { "team_key": "coritiba", "team_name": "Coritiba", "position": 7, "points": 13, "games_played": 8, "wins": 4, "draws": 1, "losses": 3, "goals_for": 9, "goals_against": 8, "goal_diff": 1, "form": "" },
+    { "team_key": "gremio", "team_name": "Gremio", "position": 8, "points": 11, "games_played": 8, "wins": 3, "draws": 2, "losses": 3, "goals_for": 13, "goals_against": 12, "goal_diff": 1, "form": "" },
+    { "team_key": "vasco", "team_name": "Vasco", "position": 9, "points": 11, "games_played": 8, "wins": 3, "draws": 2, "losses": 3, "goals_for": 13, "goals_against": 13, "goal_diff": 0, "form": "" },
+    { "team_key": "vitoria", "team_name": "Vitoria", "position": 10, "points": 10, "games_played": 7, "wins": 3, "draws": 1, "losses": 3, "goals_for": 8, "goals_against": 10, "goal_diff": -2, "form": "" },
+    { "team_key": "corinthians", "team_name": "Corinthians", "position": 11, "points": 10, "games_played": 8, "wins": 2, "draws": 4, "losses": 2, "goals_for": 7, "goals_against": 7, "goal_diff": 0, "form": "" },
+    { "team_key": "internacional", "team_name": "Internacional", "position": 12, "points": 8, "games_played": 8, "wins": 2, "draws": 2, "losses": 4, "goals_for": 7, "goals_against": 9, "goal_diff": -2, "form": "" },
+    { "team_key": "atletico mineiro", "team_name": "Atletico Mineiro", "position": 13, "points": 8, "games_played": 8, "wins": 2, "draws": 2, "losses": 4, "goals_for": 8, "goals_against": 11, "goal_diff": -3, "form": "" },
+    { "team_key": "bragantino", "team_name": "Bragantino", "position": 14, "points": 8, "games_played": 8, "wins": 2, "draws": 2, "losses": 4, "goals_for": 6, "goals_against": 10, "goal_diff": -4, "form": "" },
+    { "team_key": "chapecoense", "team_name": "Chapecoense", "position": 15, "points": 7, "games_played": 7, "wins": 1, "draws": 4, "losses": 2, "goals_for": 9, "goals_against": 11, "goal_diff": -2, "form": "" },
+    { "team_key": "santos", "team_name": "Santos", "position": 16, "points": 7, "games_played": 8, "wins": 1, "draws": 4, "losses": 3, "goals_for": 10, "goals_against": 13, "goal_diff": -3, "form": "" },
+    { "team_key": "botafogo", "team_name": "Botafogo", "position": 17, "points": 6, "games_played": 6, "wins": 2, "draws": 0, "losses": 4, "goals_for": 10, "goals_against": 12, "goal_diff": -2, "form": "" },
+    { "team_key": "mirassol", "team_name": "Mirassol", "position": 18, "points": 6, "games_played": 7, "wins": 1, "draws": 3, "losses": 3, "goals_for": 8, "goals_against": 10, "goal_diff": -2, "form": "" },
+    { "team_key": "remo", "team_name": "Remo", "position": 19, "points": 6, "games_played": 8, "wins": 1, "draws": 3, "losses": 4, "goals_for": 10, "goals_against": 15, "goal_diff": -5, "form": "" },
+    { "team_key": "cruzeiro", "team_name": "Cruzeiro", "position": 20, "points": 4, "games_played": 8, "wins": 0, "draws": 4, "losses": 4, "goals_for": 8, "goals_against": 16, "goal_diff": -8, "form": "" }
+  ]
+}
