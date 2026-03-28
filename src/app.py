@@ -171,6 +171,13 @@ class WhatsAppSendRequest(BaseModel):
     actions: Optional[list[str]] = None
 
 
+class WhatsAppWebhookTestRequest(BaseModel):
+    message: str
+    from_number: Optional[str] = None
+    event_id: Optional[str] = None
+    user_profile: Optional[str] = None
+
+
 def _format_suggested_actions(actions):
     if not actions:
         return ""
@@ -732,6 +739,54 @@ def whatsapp_send_test(request: WhatsAppSendRequest):
         ) from exc
 
 
+@app.post("/webhook/whatsapp/test")
+def whatsapp_webhook_test(request: WhatsAppWebhookTestRequest):
+    response = _build_chat_response(
+        request.message,
+        event_id=request.event_id,
+        user_profile=request.user_profile,
+    )
+
+    delivery = {
+        "enabled": is_whatsapp_send_enabled() and bool(request.from_number),
+        "sent": False,
+    }
+
+    if delivery["enabled"]:
+        try:
+            quick_actions = response.get("quick_actions") or response.get("suggested_actions") or []
+            if quick_actions:
+                provider_response = send_whatsapp_buttons(
+                    request.from_number,
+                    response["reply"],
+                    quick_actions,
+                )
+            else:
+                provider_response = send_whatsapp_text(request.from_number, response["reply"])
+            delivery["sent"] = True
+            delivery["interactive"] = bool(quick_actions)
+            delivery["provider_response"] = provider_response
+        except Exception as exc:
+            delivery["error"] = str(exc)
+
+    return {
+        "mode": "whatsapp_webhook_simulation",
+        "input": {
+            "message": request.message,
+            "from_number": request.from_number,
+            "event_id": request.event_id,
+            "user_profile": request.user_profile,
+        },
+        "reply": response.get("reply"),
+        "quick_actions": response.get("quick_actions"),
+        "suggested_actions": response.get("suggested_actions"),
+        "intent": response.get("intent"),
+        "source": response.get("source", "app"),
+        "snapshot": response.get("snapshot"),
+        "delivery": delivery,
+    }
+
+
 @app.get("/webhook/whatsapp")
 def verify_whatsapp_webhook(
     hub_mode: str = Query(alias="hub.mode"),
@@ -811,6 +866,7 @@ def root():
             "/brasileirao/teams",
             "/chat",
             "/whatsapp/send-test",
+            "/webhook/whatsapp/test",
             "/webhook/whatsapp",
         ],
         "openai_enabled": os.getenv("ENABLE_OPENAI_ANALYSIS", "0") == "1",
