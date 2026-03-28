@@ -695,7 +695,14 @@ def _build_chat_response(message: str, event_id: Optional[str] = None, user_prof
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "neuro-bit-api"}
+    return {
+        "status": "ok",
+        "service": "neuro-bit-api",
+        "openai_enabled": _openai_chat_enabled(),
+        "openai_model": os.getenv("OPENAI_CHAT_MODEL", "gpt-4.1-mini"),
+        "has_openai_api_key": bool(os.getenv("OPENAI_API_KEY")),
+        "data_source": DATA_SOURCE,
+    }
 
 
 @app.post("/analyze")
