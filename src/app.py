@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, Query, Request
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
@@ -715,14 +716,20 @@ def chat(request: ChatRequest):
 
 @app.post("/whatsapp/send-test")
 def whatsapp_send_test(request: WhatsAppSendRequest):
-    if request.actions:
-        result = send_whatsapp_buttons(request.to, request.message, request.actions)
-    else:
-        result = send_whatsapp_text(request.to, request.message)
-    return {
-        "sent": True,
-        "result": result,
-    }
+    try:
+        if request.actions:
+            result = send_whatsapp_buttons(request.to, request.message, request.actions)
+        else:
+            result = send_whatsapp_text(request.to, request.message)
+        return {
+            "sent": True,
+            "result": result,
+        }
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Falha ao enviar mensagem WhatsApp: {exc}",
+        ) from exc
 
 
 @app.get("/webhook/whatsapp")
