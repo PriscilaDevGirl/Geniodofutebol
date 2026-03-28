@@ -302,7 +302,10 @@ def _default_button_actions():
 
 
 def _openai_chat_enabled():
-    return os.getenv("ENABLE_OPENAI_ANALYSIS", "0") == "1" and bool(os.getenv("OPENAI_API_KEY"))
+    raw_flag = (os.getenv("ENABLE_OPENAI_ANALYSIS") or "").strip().lower()
+    if raw_flag in {"0", "false", "off", "no"}:
+        return False
+    return bool(os.getenv("OPENAI_API_KEY"))
 
 
 def _contains_blocked_language(message: str):
