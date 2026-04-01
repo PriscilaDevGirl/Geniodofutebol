@@ -1,298 +1,168 @@
-# Documentacao Tecnica para Jurados
+# Documentacao Tecnica
 
-## 1. Resumo executivo
+## 1. Visao geral
 
-O **Gênio do Futebol / Neurobit AI** e um assistente digital de analise esportiva focado em transformar dados de jogo em **contexto, interpretacao e suporte a decisao**. Em vez de exibir numeros crus, a plataforma combina:
+O **Genio do Futebol** e uma plataforma de analise esportiva focada em transformar dados de partidas em **contexto, previsao e explicacao clara**. O produto foi desenhado para funcionar como um assistente interpretativo, e nao como um painel de numeros crus.
 
-- ingestao de dados historicos e ao vivo;
-- modelos estatisticos e heuristicas;
-- camada explicativa em linguagem natural;
-- visualizacoes orientadas a leitura rapida;
-- interface conversacional para reduzir friccao de uso.
+Hoje a solucao opera com:
 
-O produto foi concebido para atender exatamente ao nucleo do desafio: **explicar o que pode acontecer em uma partida e por que isso faz sentido**, e nao apenas listar metricas.
+- frontend web conversacional e visual;
+- backend de inferencia e interpretacao;
+- integracao com dados esportivos ao vivo;
+- camada opcional de linguagem natural com OpenAI;
+- fluxo de demo para WhatsApp;
+- dashboard do Brasileirao com leitura contextual da rodada.
 
-## 2. O desafio e como a solucao atende
+## 2. Objetivo do produto
 
-### O que o desafio pede
+O sistema foi construido para responder perguntas como:
 
-O edital busca:
+- quem chega melhor para a partida;
+- qual time tem mais chance de vencer;
+- qual a chance de gol, cartao ou penalti;
+- qual mercado parece mais forte naquele momento;
+- por que o sistema chegou nessa leitura.
 
-- um assistente de analise esportiva;
-- previsoes e cenarios interpretaveis;
-- clareza visual;
-- fundamentacao tecnica;
-- potencial real de evolucao para produto.
+O foco principal e **interpretacao orientada ao usuario**, com respostas visuais e textuais que reduzam a carga cognitiva.
 
-### O que o projeto entrega hoje
-
-O projeto ja entrega:
-
-- previsao probabilistica para mercados de resultado e gols;
-- leitura contextual de jogo ao vivo com base em placar, minuto, ataques, cartoes e odds;
-- explicacao em linguagem natural do momento da partida;
-- priorizacao visual de mercados e oportunidades;
-- painel do Brasileirao com status dos times, rodada, artilharia, noticias e insights;
-- chat que responde em linguagem simples e guiada;
-- integracao com BetsAPI para eventos ao vivo;
-- monitoramento e persistencia de snapshots em JSON.
-
-### Conclusao de aderencia
-
-**Sim, a solucao atinge o objetivo central do desafio.**
-
-Ela entrega uma experiencia digital que funciona como um **assistente interpretativo de analise esportiva**, com previsoes, cenarios, contexto e camada visual.
-
-### Ajuste recomendado para aderencia maxima ao edital
-
-Para ficar ainda mais forte perante a banca, existe um refinamento importante que ja foi incorporado ao produto:
-
-- hoje o sistema cobre muito bem **vencedor, empate, over/under e ambas marcam**;
-- para aderencia total aos exemplos citados no edital, a solucao agora tambem expoe probabilidades explicitas para:
-  - probabilidade de gol nos proximos minutos;
-  - probabilidade de cartao;
-  - probabilidade de penalti.
-
-Ou seja: **o desafio foi atingido no nucleo interpretativo e tambem nos cenarios exemplificados pelo edital**, combinando mercados classicos com sinais contextuais dedicados.
-
-## 3. Criterios de avaliacao: como atendemos
-
-### 3.1 Qualidade e consistencia das previsoes e analises
-
-Atendemos com:
-
-- modelos supervisionados por mercado;
-- features historicas por time e por liga;
-- uso de odds e contexto ao vivo;
-- heuristicas de risco e consistencia;
-- priorizacao do melhor mercado com edge.
-
-### 3.2 Clareza da visualizacao e facilidade de entendimento
-
-Atendemos com:
-
-- tela inicial orientada a confrontos;
-- painel do Brasileirao com cards e tabelas;
-- chat com respostas explicativas;
-- barras de probabilidade;
-- cards de sentimento, risco, edge e oportunidade;
-- linguagem nao tecnica para o usuario final.
-
-### 3.3 Fundamentacao dos modelos
-
-Atendemos com:
-
-- engenharia de features historicas;
-- Random Forest para classificacao por mercado;
-- calculo de probabilidades implicitas e edge;
-- heuristicas explicaveis para tilt, risco e sentimento;
-- possibilidade de enriquecimento com datasets externos.
-
-### 3.4 Criatividade na escolha de cenarios e indicadores
-
-Atendemos com:
-
-- Zen Guard para disciplina de exposicao;
-- tilt emocional do jogo;
-- leitura de pressao da torcida;
-- narrativas automaticas;
-- radar da rodada e insights do Brasileirao.
-
-### 3.5 Viabilidade tecnica e potencial de evolucao
-
-Atendemos com:
-
-- arquitetura modular;
-- API desacoplada do frontend;
-- monitoramento por snapshots;
-- integracao pronta com fontes externas;
-- stack moderna e facilmente escalavel;
-- roadmap claro para MVP comercial.
-
-## 4. Arquitetura da solucao
-
-### 4.1 Visao geral
-
-O sistema segue uma arquitetura em camadas:
-
-1. **Coleta de dados**
-   BetsAPI para eventos ao vivo, odds, lineup e agenda.
-2. **Dados historicos**
-   CSVs locais e datasets adicionais via Kaggle/arquivos compativeis.
-3. **Feature engineering**
-   Criacao de features de gols, forma, taxa de empate, desempenho por time e liga.
-4. **Modelagem**
-   Treinamento de modelos por mercado.
-5. **Engine de interpretacao**
-   Junta probabilidade, odds, edge, risco e narrativa.
-6. **API**
-   Explica e expõe os resultados para chat, dashboard e painel web.
-7. **Frontend**
-   Converte o resultado tecnico em experiencia visual e conversacional.
-
-### 4.2 Diagrama resumido
+## 3. Arquitetura de alto nivel
 
 ```text
-Datasets historicos / CSV / Kaggle
-                |
-                v
-      src/features.py
-                |
-                v
-        src/model.py
-                |
-                v
-      src/predictor.py
-                |
-                +-------------------+
-                |                   |
-                v                   v
-          src/engine.py       src/assistant.py
-                |                   |
-                +---------+---------+
-                          |
-                          v
-                     src/app.py
-                          |
-        +-----------------+------------------+
-        |                                    |
-        v                                    v
-lovable_import (React/Vite)         dashboard HTML estatico
+Fontes de dados e datasets
+        |
+        v
+  Coleta e normalizacao
+        |
+        v
+  Engenharia de features
+        |
+        v
+  Modelos por mercado
+        |
+        v
+  Engine de interpretacao
+        |
+        +--------------------+
+        |                    |
+        v                    v
+    API FastAPI         Camada OpenAI
+        |
+        +------------------------------+
+        |                              |
+        v                              v
+Frontend React/Vite             Fluxo WhatsApp/demo
 ```
 
-## 5. Arquitetura do backend
+## 4. Arquitetura do backend
 
-### 5.1 Stack principal
+### 4.1 Stack
 
-- **Python 3.11+**
-- **FastAPI**
-- **Uvicorn**
-- **pandas**
-- **scikit-learn**
-- **requests**
-- **OpenAI API** opcional
-- **kagglehub** para datasets adicionais
+- Python
+- FastAPI
+- Uvicorn
+- pandas
+- scikit-learn
+- requests
+- OpenAI API
 
-### 5.2 Modulos principais
+### 4.2 Responsabilidades
 
-- [main.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\main.py)
-  fluxo de execucao, treino e monitor.
+O backend concentra:
 
-- [src/app.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\app.py)
-  API principal, CORS, rotas, dashboard e endpoints de chat.
+- integracao com BetsAPI;
+- leitura de datasets locais;
+- treino e carga do bundle de modelo;
+- inferencia de probabilidades;
+- calculo de edge e leitura de risco;
+- narrativa automatica;
+- endpoints de chat, dashboard e WhatsApp.
 
-- [src/api.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\api.py)
-  cliente BetsAPI para eventos ao vivo, ended, upcoming, odds e lineup.
+### 4.3 Modulos principais
 
-- [src/features.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\features.py)
-  leitura, normalizacao e enriquecimento de datasets.
+- [main.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\main.py): entrada do projeto e execucao local.
+- [src/app.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\app.py): API principal, rotas, CORS, healthcheck e fluxos de chat.
+- [src/api.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\api.py): integracao com a BetsAPI.
+- [src/features.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\features.py): carga, limpeza e engenharia de features.
+- [src/model.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\model.py): treinamento dos modelos por mercado.
+- [src/predictor.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\predictor.py): inferencia em cima do bundle treinado.
+- [src/engine.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\engine.py): motor de leitura de contexto, probabilidades e board de oportunidades.
+- [src/assistant.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\assistant.py): heuristicas, narrativa e camada explicativa.
+- [src/openai_client.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\openai_client.py): composicao da resposta em linguagem natural.
+- [src/whatsapp_client.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\whatsapp_client.py): envio de mensagens via WhatsApp API.
+- [src/env_loader.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\env_loader.py): carga automatica do `.env`.
 
-- [src/model.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\model.py)
-  treinamento dos modelos por mercado.
+### 4.4 Fluxo do backend
 
-- [src/predictor.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\predictor.py)
-  inferencia de probabilidades a partir do bundle treinado.
+1. O sistema carrega configuracoes e modelo.
+2. Busca dados ao vivo ou usa fallback local.
+3. Monta features do confronto.
+4. Gera probabilidades por mercado.
+5. Calcula edge e sinais de contexto.
+6. Monta snapshot interpretativo.
+7. Entrega a resposta para chat, dashboard ou WhatsApp.
 
-- [src/engine.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\engine.py)
-  orquestracao da leitura ao vivo, odds, score, minuto, lineup e board de oportunidades.
+## 5. Arquitetura do frontend
 
-- [src/assistant.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\assistant.py)
-  heuristicas de tilt, sentimento, edge, Zen Guard e narrativas.
+### 5.1 Stack
 
-- [src/openai_client.py](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\src\openai_client.py)
-  camada opcional de linguagem natural com LLM.
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- Framer Motion
+- Radix UI
+- React Markdown
 
-### 5.3 Endpoints relevantes
+### 5.2 Responsabilidades
 
-Rotas ja implementadas:
+O frontend e responsavel por:
 
-- `GET /health`
-- `POST /analyze`
-- `GET /opportunities`
-- `POST /chat`
-- `POST /whatsapp/send-test`
-- `GET /webhook/whatsapp`
-- `POST /webhook/whatsapp`
-- `GET /dashboard`
-- `GET /brasileirao/teams`
-- `GET /brasileirao/overview`
-- `GET /dashboard/brasileirao`
+- transformar previsao em leitura visual;
+- conduzir o usuario por perguntas guiadas;
+- apresentar insights, cards e barras de probabilidade;
+- exibir o dashboard do Brasileirao;
+- simular o fluxo de atendimento via WhatsApp.
 
-### 5.4 Logica do backend
+### 5.3 Componentes principais
 
-O backend segue este fluxo:
+- [lovable_import/src/components/WelcomeScreen.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\WelcomeScreen.tsx): entrada da experiencia.
+- [lovable_import/src/components/ChatScreen.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\ChatScreen.tsx): chat principal com quick replies, cards e simulacao do WhatsApp.
+- [lovable_import/src/components/BrasileiraoDashboard.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\BrasileiraoDashboard.tsx): painel geral do Brasileirao.
+- [lovable_import/src/components/SportsbookIntro.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\SportsbookIntro.tsx): tela introdutoria com radar da rodada, agenda e termometro.
+- [lovable_import/src/components/WhatsAppCTA.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\WhatsAppCTA.tsx): CTA para contato e demonstracao do canal.
+- [lovable_import/src/lib/api.ts](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\lib\api.ts): camada cliente para consumo da API.
 
-1. Treina ou carrega o bundle de modelo.
-2. Consulta jogo ao vivo ou agenda via BetsAPI.
-3. Extrai placar, minuto, cartoes, ataques e odds.
-4. Monta as features do confronto.
-5. Gera probabilidades por mercado.
-6. Calcula edge contra odds.
-7. Aplica heuristicas de risco e contexto.
-8. Gera resposta interpretativa para API e frontend.
+## 6. Fontes de dados
 
-## 6. Arquitetura do frontend
+### 6.1 Fontes operacionais
 
-### 6.1 Stack principal
+- BetsAPI para eventos ao vivo, agenda, odds e contexto de partida.
+- Datasets locais em CSV para treino.
+- Arquivos JSON e JSONL para snapshots e fallback de leitura.
 
-- **React 18**
-- **TypeScript**
-- **Vite**
-- **Tailwind CSS**
-- **framer-motion**
-- **React Router**
-- **Radix UI**
-- **Vitest** para testes
+### 6.2 Fontes previstas na arquitetura
 
-### 6.2 Componentes principais
+O pipeline foi estruturado para absorver enriquecimento com:
 
-- [lovable_import/src/components/WelcomeScreen.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\WelcomeScreen.tsx)
-  entrada do produto e selecao rapida de confrontos.
+- StatsBomb Open Data;
+- bases de jogadores como FBref;
+- novos datasets locais compativeis com o mapeamento de colunas.
 
-- [lovable_import/src/components/ChatScreen.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\ChatScreen.tsx)
-  assistente conversacional com quick replies, insight cards e probabilidade.
+## 7. Modelagem e fundamentacao
 
-- [lovable_import/src/components/BrasileiraoDashboard.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\BrasileiraoDashboard.tsx)
-  painel com overview, tabela, rodada, noticias e mercados.
+### 7.1 Abordagem atual
 
-- [lovable_import/src/components/SportsbookIntro.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\SportsbookIntro.tsx)
-  mock visual da experiencia sportsbook com radar, agenda, termometro e contexto.
+O projeto usa uma combinacao de:
 
-- [lovable_import/src/components/MarketOdds.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\MarketOdds.tsx)
-  apresentacao de odds, probabilidades e edge.
+- features historicas por time e liga;
+- classificadores por mercado;
+- leitura contextual ao vivo;
+- heuristicas explicaveis;
+- narrativa automatica apoiada por OpenAI.
 
-- [lovable_import/src/components/MatchProbabilityBar.tsx](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\lovable_import\src\components\MatchProbabilityBar.tsx)
-  comparacao visual de cenarios.
+### 7.2 Mercados cobertos
 
-### 6.3 Papel do frontend no desafio
-
-O frontend nao e apenas cosmetico. Ele cumpre um papel central no criterio de avaliacao porque:
-
-- traduz previsao em leitura visual;
-- reduz carga cognitiva;
-- orienta o usuario por perguntas prontas;
-- contextualiza rodada, forma e oportunidades;
-- apresenta a analise como produto, e nao como planilha.
-
-## 7. Modelagem e fundamentacao tecnica
-
-### 7.1 Features utilizadas atualmente
-
-O modelo usa features como:
-
-- saldo de gols;
-- total de gols;
-- taxa de empates da liga;
-- media de gols da liga;
-- media de gols do mandante;
-- media de gols do visitante;
-- taxa de vitoria em casa/fora;
-- forma recente em gols;
-- forma recente em pontos.
-
-### 7.2 Mercados modelados hoje
-
-Mercados explicitamente implementados:
+Mercados e cenarios atualmente expostos:
 
 - `home_win`
 - `draw`
@@ -304,312 +174,159 @@ Mercados explicitamente implementados:
 - `card_next_10m`
 - `penalty_in_match`
 
-### 7.3 Heuristicas complementares
+### 7.3 Sinais complementares
 
-Para enriquecer a interpretacao, o sistema tambem gera:
+O produto tambem calcula ou infere:
 
-- **tilt**
-  detecta tensao emocional da partida.
+- melhor mercado do momento;
+- edge estimado;
+- tilt da partida;
+- Zen Guard para cautela;
+- crowd sentiment;
+- sugestoes de acompanhamento ao vivo.
 
-- **crowd sentiment**
-  estima confianca ou pressao da torcida.
+## 8. Endpoints principais
 
-- **market value**
-  compara probabilidade do modelo com probabilidade implicita da odd.
+### 8.1 API publica
 
-- **Zen Guard**
-  camada de disciplina que evita superconfianca em cenarios instaveis.
+- `GET /health`
+- `POST /chat`
+- `POST /analyze`
+- `GET /opportunities`
+- `GET /brasileirao/teams`
+- `GET /brasileirao/overview`
+- `GET /dashboard`
+- `GET /dashboard/brasileirao`
 
-- **narrativa**
-  converte o estado do jogo em explicacao textual.
+### 8.2 WhatsApp e simulacao
 
-### 7.4 Por que essa abordagem e boa para a banca
+- `POST /whatsapp/send-test`
+- `GET /webhook/whatsapp`
+- `POST /webhook/whatsapp`
+- `POST /webhook/whatsapp/test`
 
-Porque ela combina:
+O endpoint `/webhook/whatsapp/test` foi criado para demonstracao confiavel da experiencia de WhatsApp mesmo quando a Meta restringe o inbound real em ambiente de desenvolvimento.
 
-- estatistica;
-- machine learning;
-- heuristica explicavel;
-- camada de UX;
-- interpretacao automatica.
+## 9. Integracao com OpenAI
 
-Isso se alinha de forma direta com o criterio "nao mostrar so dado, mas interpretacao".
+### 9.1 Papel da OpenAI
 
-## 8. Fontes de dados
+A OpenAI entra na camada de resposta em linguagem natural. Ela nao substitui a engine do sistema; ela **traduz o contexto tecnico em explicacao clara**, baseada no payload montado pelo backend.
 
-### 8.1 Ja integradas
+### 9.2 Comportamento atual
 
-- **BetsAPI**
-  usada para eventos ao vivo, agenda, resultados, odds e lineup.
+- com `OPENAI_API_KEY` valida, o chat responde com linguagem natural enriquecida;
+- a API expõe o status dessa integracao em `GET /health`;
+- o backend online hoje esta apto a responder com `source: openai`.
 
-- **CSVs locais**
-  base para treino e fallback.
+## 10. Fluxo de WhatsApp
 
-- **Kaggle / datasets compativeis**
-  suporte para enriquecimento do treino via arquivos externos.
+### 10.1 O que existe hoje
 
-### 8.2 Fontes do edital e aderencia
+- envio real via WhatsApp API;
+- validacao de webhook;
+- simulacao controlada do webhook para demo;
+- CTA visual no frontend;
+- narrativa de produto para banca.
 
-O desafio cita:
+### 10.2 Motivo da simulacao
 
-- BetsAPI;
-- StatsBomb Open Data;
-- FBref Players 2025-26.
+Em ambiente de app nao publicado na Meta, o inbound real pode ser limitado. Para nao depender disso em apresentacao, o projeto possui um fluxo tecnico equivalente de simulacao via API.
 
-### 8.3 Situacao atual do projeto
+## 11. Configuracoes de ambiente
 
-Hoje o projeto utiliza de forma operacional:
+### 11.1 Backend
 
-- BetsAPI;
-- dados historicos locais;
-- datasets estruturados compativeis com o pipeline atual.
+Variaveis principais:
 
-### 8.4 Recomendacao para a apresentacao
+- `OPENAI_API_KEY`
+- `BETSAPI_TOKEN`
+- `DATA_SOURCE`
+- `ENABLE_OPENAI_ANALYSIS`
+- `OPENAI_CHAT_MODEL`
+- `FRONTEND_ORIGINS`
+- `WHATSAPP_VERIFY_TOKEN`
+- `WHATSAPP_ACCESS_TOKEN`
+- `WHATSAPP_PHONE_NUMBER_ID`
+- `WHATSAPP_API_VERSION`
 
-Na apresentacao para jurados, a melhor formulacao e:
+### 11.2 Frontend
 
-> A solucao ja opera com dados ao vivo da BetsAPI e com base historica estruturada. A arquitetura foi desenhada para incorporar StatsBomb e FBref como camadas de enriquecimento de eventos e jogadores, ampliando a profundidade analitica sem mudar a experiencia do usuario.
+Variaveis principais:
 
-Essa frase e verdadeira, forte e tecnicamente defensavel.
+- `VITE_API_BASE_URL`
+- `VITE_WHATSAPP_NUMBER`
+- `VITE_WHATSAPP_MESSAGE`
 
-## 9. O que ja prova interpretacao, e nao exibicao bruta
+## 12. Deploy
 
-O produto ja nao se comporta como dashboard bruto porque:
+### 12.1 Arquitetura de deploy atual
 
-- responde em linguagem natural;
-- compara cenarios em vez de listar campos tecnicos;
-- destaca mercados prioritarios;
-- explica risco e edge;
-- mostra contexto do time e da rodada;
-- usa cards com headlines interpretativas;
-- oferece perguntas guiadas ao usuario.
+- backend em Render;
+- frontend em Vercel;
+- repositorio principal no GitHub.
 
-## 10. O que ainda recomendamos mudar para aderencia maxima
+### 12.2 URLs operacionais
 
-### 10.1 Mudancas recomendadas no produto
+- frontend: `https://geniodofutebol-bz22.vercel.app`
+- backend: `https://geniodofutebol.onrender.com`
+- repositorio: `https://github.com/PriscilaDevGirl/Geniodofutebol`
 
-1. Evoluir a calibracao dos mercados dedicados ja adicionados:
-   - chance de gol nos proximos 10 minutos;
-   - chance de cartao no restante do jogo;
-   - chance de penalti na partida.
+### 12.3 Requisitos para frontend conversar com o backend
 
-2. Exibir no frontend a fundamentacao de cada previsao em formato padrao:
-   - sinais usados;
-   - peso relativo;
-   - dado ao vivo;
-   - historico recente.
+No Render:
 
-3. Adicionar uma secao pequena de confianca/calibracao:
-   - acerto historico;
-   - backtest;
-   - taxa de acerto por mercado.
+- `FRONTEND_ORIGINS` deve conter a URL do Vercel.
 
-4. Incluir claramente a fonte do dado em cada tela:
-   - ao vivo;
-   - historico;
-   - fallback local.
+No Vercel:
 
-### 10.2 O que nao e obrigatorio para a demo
+- `VITE_API_BASE_URL` deve apontar para o backend do Render.
 
-Nao e necessario transformar o projeto inteiro antes da banca. O ganho marginal mais importante esta em:
+## 13. Observabilidade e operacao
 
-- explicitar **mais tres cenarios probabilisticos**;
-- mostrar **fundamentacao visual**;
-- comunicar **viabilidade tecnica e roadmap**.
+O projeto possui:
 
-## 11. Tecnologias utilizadas
+- endpoint de healthcheck;
+- logs locais e online;
+- snapshots de monitoramento;
+- fallback local para parte da leitura;
+- modo de simulacao para apresentacao.
 
-### Backend
+Arquivos relevantes:
 
-- Python
-- FastAPI
-- Uvicorn
-- pandas
-- scikit-learn
-- requests
-- OpenAI API
-- kagglehub
+- [data/live_monitor_latest.json](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\data\live_monitor_latest.json)
+- [backend8011.out.log](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\backend8011.out.log)
+- [backend8011.err.log](c:\Users\Convidado!\OneDrive\Área de Trabalho\neurobit-ai\backend8011.err.log)
 
-### Frontend
+## 14. Estado atual do produto
 
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-- Radix UI
-- Framer Motion
-- React Router
-- Vitest
+Hoje o projeto entrega:
 
-### Infra e integracoes
+- chat com OpenAI online;
+- dashboard visual do Brasileirao;
+- probabilidades para vencedor, gols e cenarios de evento;
+- simulacao visual e tecnica do WhatsApp;
+- deploy funcional em Vercel e Render;
+- documentacao, pitch e materiais de apoio.
 
-- BetsAPI
-- Vercel ou deploy estatico frontend
-- Render ou servidor Python para API
-- WhatsApp API
-- arquivos JSON/JSONL para snapshots
+## 15. Limites tecnicos atuais
 
-## 12. Custos aproximados do projeto
+Pontos que ainda podem evoluir:
 
-Os valores abaixo sao aproximacoes realistas para **prototipo funcional** e **MVP comercial inicial**, considerando Brasil e uma equipe enxuta.
+- calibracao mais forte para cartao e penalti;
+- exposicao visual de confianca historica;
+- testes automatizados mais amplos;
+- observabilidade mais robusta em producao;
+- enriquecimento por datasets de eventos e jogadores.
 
-### 12.1 Custo de desenvolvimento do prototipo atual
+## 16. Proximos passos recomendados
 
-Se este projeto fosse orcado do zero como entrega de software:
+1. Adicionar metricas de calibracao por mercado.
+2. Expor confianca e fonte do dado na interface.
+3. Persistir sessoes e historico de usuario.
+4. Ampliar mercados e cenarios.
+5. Evoluir o fluxo comercial de WhatsApp.
 
-- produto/UX: 40 a 80 horas
-- frontend: 80 a 140 horas
-- backend e modelagem: 120 a 220 horas
-- integracoes e ajustes: 40 a 80 horas
+## 17. Conclusao
 
-Faixa total:
-
-- **280 a 520 horas**
-
-Com valor medio de equipe entre **R$ 70/h e R$ 130/h**, o custo estimado seria:
-
-- **R$ 19.600 a R$ 67.600**
-
-### 12.2 Custo mensal de operacao para piloto
-
-Para um piloto com baixo a medio trafego:
-
-- frontend hospedado: R$ 0 a R$ 100/mes
-- backend/API: R$ 80 a R$ 400/mes
-- logs/monitoramento: R$ 0 a R$ 150/mes
-- LLM opcional: R$ 100 a R$ 1.000/mes
-- WhatsApp/API externa: R$ 50 a R$ 500/mes
-
-Faixa mensal estimada:
-
-- **R$ 230 a R$ 2.150/mes**
-
-### 12.3 Custo para MVP comercial mais robusto
-
-Com autenticacao, observabilidade, calibracao de modelos, novos mercados e operacao mais confiavel:
-
-- **R$ 80 mil a R$ 180 mil** de desenvolvimento
-- **R$ 1.500 a R$ 8.000/mes** de operacao inicial
-
-## 13. Em quanto tempo pode chegar ao cliente
-
-### Cenário 1: piloto fechado
-
-Com a base atual, o tempo para colocar com usuarios piloto e curto.
-
-Estimativa:
-
-- **2 a 4 semanas** para piloto controlado
-
-Necessario fazer:
-
-- endurecimento de deploy;
-- ajuste fino de copy;
-- logs e monitoramento;
-- validacao de fluxo de chat e dashboard;
-- definicao de escopo comercial.
-
-### Cenário 2: primeiro cliente pagante
-
-Estimativa:
-
-- **6 a 10 semanas**
-
-Necessario fazer:
-
-- estabilidade de API;
-- calibracao minima dos modelos;
-- politicas de fallback;
-- melhoria de explicabilidade;
-- empacotamento comercial.
-
-### Cenário 3: produto pronto para escalar comercialmente
-
-Estimativa:
-
-- **3 a 5 meses**
-
-Necessario fazer:
-
-- autenticao e multi-tenant;
-- persistencia de usuarios e historico;
-- observabilidade;
-- mais mercados preditivos;
-- testes automatizados;
-- compliance e governanca de dados.
-
-## 14. Viabilidade comercial
-
-O projeto tem viabilidade por tres motivos:
-
-1. Resolve dor real.
-   O usuario quer contexto e leitura, nao apenas odds ou numeros.
-
-2. Tem formato vendavel.
-   Pode virar B2B2C para sportsbook, afiliado premium, produto editorial ou assistente de second-screen.
-
-3. Tem arquitetura evolutiva.
-   A base atual comporta enriquecimento com dados de jogador, evento, tracking e LLM sem reescrever o produto.
-
-## 15. Diferenciais competitivos
-
-- assistente com linguagem natural;
-- UX de interpretacao, nao de planilha;
-- camada de risco e edge;
-- foco em usabilidade;
-- modularidade tecnica;
-- possibilidade de operar em chat, painel e WhatsApp;
-- boa narrativa para demo e boa base para virar produto.
-
-## 16. Riscos e limitacoes atuais
-
-Para ser tecnicamente honesto com a banca, estes sao os principais pontos de atencao:
-
-- o modelo atual ja expoe eventos micro, mas ainda e mais forte em mercados classicos de resultado e gols do que em cartao e penalti;
-- ainda faltam testes automatizados mais robustos;
-- o backtest/calibracao nao esta exposto de forma forte na UX;
-- ha dependencia de disponibilidade da API externa;
-- parte da base historica ainda pode ser enriquecida com mais granularidade.
-
-Nenhum desses pontos invalida a proposta. Eles indicam apenas o caminho natural de maturacao do MVP.
-
-## 17. Roadmap recomendado
-
-### Fase 1: banca / demo
-
-- consolidar apresentacao;
-- expor claramente probabilidades e interpretacao;
-- destacar vencedor, gols, momentum e risco;
-- reforcar a calibracao visual e estatistica dos mercados de gol/cartao/penalti.
-
-### Fase 2: piloto
-
-- incluir persistencia de sessoes;
-- tracking de uso;
-- dashboards internos;
-- calibracao de modelos;
-- monitoramento de falhas.
-
-### Fase 3: comercial
-
-- contas de usuario;
-- perfis de cliente;
-- recomendacao personalizada;
-- mais campeonatos;
-- enrichment com StatsBomb e FBref.
-
-## 18. Frase de defesa para o pitch
-
-> Nosso projeto nao mostra dados crus. Ele interpreta o jogo para o usuario. Combinamos dados ao vivo, historico, machine learning, heuristicas explicaveis e UX conversacional para transformar informacao esportiva em leitura clara, visual e acionavel.
-
-## 19. Conclusao final para os jurados
-
-O **Gênio do Futebol / Neurobit AI** atende o desafio porque entrega:
-
-- previsao;
-- interpretacao;
-- fundamentacao tecnica;
-- visualizacao clara;
-- viabilidade de evolucao para produto real.
-
-Mais do que um dashboard, a solucao ja funciona como um **assistente de analise esportiva**. O projeto esta em um ponto muito bom para banca e, com um ciclo curto adicional, pode entrar em piloto com clientes reais.
+O **Genio do Futebol** ja opera como um assistente tecnico de analise esportiva, com backend modular, frontend explicativo, integracao online e camada conversacional. A arquitetura atual sustenta apresentacao, piloto controlado e evolucao para produto comercial.

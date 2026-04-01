@@ -86,11 +86,33 @@ BLOCKED_LANGUAGE_TERMS = [
     "cu",
 ]
 
-BRASILEIRAO_SCOPE_TERMS = [
+FOOTBALL_SCOPE_TERMS = [
     "brasileirao",
     "brasileirão",
     "serie a",
     "série a",
+    "futebol",
+    "selecao",
+    "seleção",
+    "selecao brasileira",
+    "seleção brasileira",
+    "copa",
+    "copa do mundo",
+    "world cup",
+    "amistoso",
+    "amistosos",
+    "fifa",
+    "uefa",
+    "conmebol",
+    "eliminatorias",
+    "eliminatórias",
+    "nations league",
+    "jogos de hoje",
+    "jogos atuais",
+    "quem joga hoje",
+    "quem joga agora",
+    "ao vivo",
+    "placar ao vivo",
     "time",
     "times",
     "clube",
@@ -313,10 +335,10 @@ def _contains_blocked_language(message: str):
     return any(term in normalized_message for term in BLOCKED_LANGUAGE_TERMS)
 
 
-def _is_brasileirao_scope(message: str):
+def _is_supported_football_scope(message: str):
     normalized_message = (message or "").lower()
     team_name = find_brasileirao_team_in_message(normalized_message)
-    has_football_term = any(term in normalized_message for term in BRASILEIRAO_SCOPE_TERMS)
+    has_football_term = any(term in normalized_message for term in FOOTBALL_SCOPE_TERMS)
     has_off_topic_term = any(term in normalized_message for term in OFF_TOPIC_TERMS)
 
     if has_off_topic_term and not has_football_term:
@@ -354,29 +376,29 @@ def _build_guardrail_response(kind: str):
     if kind == "language":
         return {
             "reply": (
-                "Vamos manter a conversa limpa por aqui. Eu posso te ajudar com o Brasileirao, falando de times, "
-                "placar, tabela, jogadores, ultimos jogos e curiosidades do campeonato."
+                "Vamos manter a conversa limpa por aqui. Eu posso te ajudar com futebol, incluindo Brasileirao, "
+                "jogos ao vivo, selecoes, amistosos e leituras de partidas."
             ),
             "suggested_actions": [
                 "me fala do Flamengo",
-                "como esta o Botafogo",
-                "quem lidera o Brasileirao",
+                "quem joga hoje",
+                "me fala dos amistosos da copa do mundo",
             ],
-            "quick_actions": ["Flamengo", "Botafogo", "Tabela"],
+            "quick_actions": ["Flamengo", "Jogos de hoje", "Amistosos"],
             "intent": "general",
         }
 
     return {
         "reply": (
-            "Eu fico focado no universo do Brasileirao. Posso responder sobre times, jogadores, placar, "
-            "posicao na tabela, ultimos jogos, confrontos e curiosidades de futebol."
+            "Eu fico focado em futebol. Posso responder sobre Brasileirao, jogos ao vivo, selecoes, amistosos, "
+            "placar, confrontos, contexto de partida e curiosidades."
         ),
         "suggested_actions": [
             "me fala do Palmeiras",
-            "ultimos jogos do Corinthians",
-            "quem esta melhor no Brasileirao",
+            "quem joga hoje",
+            "me fala dos amistosos da copa do mundo",
         ],
-        "quick_actions": ["Palmeiras", "Corinthians", "Tabela"],
+        "quick_actions": ["Palmeiras", "Jogos de hoje", "Amistosos"],
         "intent": "general",
     }
 
@@ -572,7 +594,7 @@ def _build_chat_response(message: str, event_id: Optional[str] = None, user_prof
     if _contains_blocked_language(normalized_message):
         return _build_guardrail_response("language")
 
-    if not _is_brasileirao_scope(normalized_message):
+    if not _is_supported_football_scope(normalized_message):
         return _build_guardrail_response("scope")
 
     user_profile = user_profile or _detect_user_profile(normalized_message)
@@ -1231,6 +1253,95 @@ def _team_chat_summary(team_name, team_context=None):
     return format_team_event_context(team_name, team_context)
 
 
+def _extract_event_name(block):
+    if isinstance(block, dict):
+        return str(block.get("name") or block.get("team") or "")
+    return str(block or "")
+
+
+def _extract_league_name(event):
+    league = event.get("league") if isinstance(event, dict) else None
+    if isinstance(league, dict):
+        return str(league.get("name") or "")
+    return str((event or {}).get("league_name") or (event or {}).get("league") or "")
+
+
+def _build_event_feed_rows(events, limit=5):
+    rows = []
+    for event in (events or [])[:limit]:
+        if not isinstance(event, dict):
+            continue
+        home_name = _extract_event_name(event.get("home"))
+        away_name = _extract_event_name(event.get("away"))
+        league_name = _extract_league_name(event)
+        score = str(event.get("ss") or "-")
+        time_status = str(event.get("time_status") or event.get("timer") or event.get("time") or "")
+        row = {
+            "event_id": event.get("id") or event.get("event_id"),
+            "match": f"{home_name or 'Mandante'} x {away_name or 'Visitante'}",
+            "league": league_name or "Competicao nao informada",
+            "score": score,
+            "time_status": time_status,
+        }
+        rows.append(row)
+    return rows
+
+
+def _build_live_feed_context():
+    context = {
+        "live_matches": [],
+        "upcoming_matches": [],
+        "friendlies_or_world_cup": [],
+    }
+
+    try:
+        live_events = get_live_football_events()
+        context["live_matches"] = _build_event_feed_rows(live_events, limit=5)
+    except Exception as exc:
+        context["live_error"] = str(exc)
+
+    try:
+        upcoming_events = get_upcoming_football_events(day="today")
+        rows = _build_event_feed_rows(upcoming_events, limit=8)
+        context["upcoming_matches"] = rows
+        context["friendlies_or_world_cup"] = [
+            row
+            for row in rows
+            if any(
+                marker in row["league"].lower()
+                for marker in ["world cup", "copa do mundo", "friendly", "amistoso", "fifa"]
+            )
+        ][:5]
+    except Exception as exc:
+        context["upcoming_error"] = str(exc)
+
+    return context
+
+
+def _is_brasileirao_offday():
+    overview = _load_brasileirao_overview()
+    summary = overview.get("summary", {}) if isinstance(overview, dict) else {}
+    return summary.get("mens_games_today") is False
+
+
+def _message_asks_for_current_or_world_cup_context(message: str):
+    normalized_message = (message or "").lower()
+    markers = [
+        "jogos de hoje",
+        "jogos atuais",
+        "quem joga hoje",
+        "quem joga agora",
+        "ao vivo",
+        "amistoso",
+        "amistosos",
+        "copa do mundo",
+        "world cup",
+        "selecao",
+        "seleção",
+    ]
+    return any(marker in normalized_message for marker in markers)
+
+
 def _build_chat_context_payload(message: str, event_id: Optional[str], user_profile: str, intent: str):
     teams = find_brasileirao_teams_in_message(message)
     team_name = find_brasileirao_team_in_message(message)
@@ -1243,6 +1354,7 @@ def _build_chat_context_payload(message: str, event_id: Optional[str], user_prof
         "teams_detected": teams,
         "table_context": _load_brasileirao_table(),
         "overview": overview,
+        "live_feed": _build_live_feed_context(),
         "training_summary": {
             "data_source": DATA_SOURCE,
             "markets_available": list(MARKET_TARGETS.keys()) + ["goal_next_10m", "card_next_10m", "penalty_in_match"],
@@ -1315,10 +1427,18 @@ def _try_openai_chat_reply(message: str, event_id: Optional[str], user_profile: 
         reply = generate_brasileirao_chat_reply(message, context_payload)
     except Exception:
         return None
+
+    if _is_brasileirao_offday() and _message_asks_for_current_or_world_cup_context(message):
+        reply = (
+            "Como o Brasileirao esta sem rodada ativa no momento, eu tambem posso te orientar com jogos atuais do "
+            "futebol, selecoes e amistosos de contexto internacional.\n\n"
+            f"{reply}"
+        )
+
     suggested_actions = [
-        "ultimos jogos",
-        "tabela do Brasileirao",
-        "comparar dois times",
+        "jogos de hoje",
+        "quem joga agora",
+        "amistosos da copa do mundo",
     ]
     if context_payload.get("team_detected"):
         display_name = get_team_display_name(context_payload["team_detected"])
@@ -1331,7 +1451,7 @@ def _try_openai_chat_reply(message: str, event_id: Optional[str], user_profile: 
     return {
         "reply": reply,
         "suggested_actions": suggested_actions,
-        "quick_actions": ["Ultimos jogos", "Tabela", "Curiosidades"],
+        "quick_actions": ["Jogos de hoje", "Ao vivo", "Amistosos"],
         "intent": intent,
         "source": "openai",
     }

@@ -15,6 +15,7 @@ interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
+  channel?: "chat" | "whatsapp";
   insights?: Array<{
     type: "probability" | "risk" | "opportunity" | "momentum" | "warning";
     title: string;
@@ -52,12 +53,12 @@ const FALLBACK_RESPONSE: ChatMessage = {
   id: "fallback",
   role: "assistant",
   content:
-    "Posso te ajudar com analises de jogos e times do Brasileirao.\n\nSe quiser algo mais pratico, abre o painel do Brasileirao para ver quais times estao ao vivo ou jogam hoje, e depois eu sigo com a analise no chat.",
+    "Posso te ajudar com analises do Brasileirao, jogos atuais do futebol e amistosos de selecoes.\n\nSe o Brasileirao estiver sem rodada no momento, eu sigo com leitura de jogos do dia, contexto ao vivo e alternativas internacionais no chat.",
   quickReplies: [
-    "Flamengo x Palmeiras",
-    "Corinthians x Sao Paulo",
+    "Quem joga hoje?",
     "Quais sao as oportunidades ao vivo?",
-    "Me fala do Botafogo",
+    "Me fala dos amistosos da copa do mundo",
+    "Me fala do Flamengo",
   ],
 };
 
@@ -69,6 +70,8 @@ interface ChatScreenProps {
 
 interface ChatApiResponse {
   reply: string;
+  mode?: string;
+  source?: string;
   suggested_actions?: string[];
   quick_actions?: string[];
   snapshot?: {
@@ -217,6 +220,7 @@ function buildAssistantMessage(payload: ChatApiResponse): ChatMessage {
   return {
     id: `${Date.now()}`,
     role: "assistant",
+    channel: payload.mode === "whatsapp_webhook_simulation" ? "whatsapp" : "chat",
     content: payload.reply || FALLBACK_RESPONSE.content,
     insights: insights.length ? insights : undefined,
     matchProb:
@@ -269,19 +273,19 @@ export const ChatScreen = ({ initialMessage, onBack, onOpenDashboard }: ChatScre
       id: "welcome",
       role: "assistant",
       content:
-        "Estou aqui para te ajudar com o **Brasileirao**.\n\nMe fala qual jogo ou time voce quer analisar, ou use o microfone para perguntar sobre qualquer time.",
+        "Estou aqui para te ajudar com o **Brasileirao**, jogos atuais do futebol e amistosos de selecoes.\n\nSe o Brasileirao estiver em pausa, eu posso puxar alternativas de jogos do dia, ao vivo e contexto internacional.",
       quickReplies: [
-        "Flamengo x Palmeiras",
-        "Corinthians x Sao Paulo",
+        "Quem joga hoje?",
         "Quais sao as oportunidades ao vivo?",
-        "Me fala do Botafogo",
+        "Me fala dos amistosos da copa do mundo",
+        "Me fala do Flamengo",
       ],
     };
     setMessages([welcome]);
   }, []);
 
   const handleSendMessage = async (text: string) => {
-    const userMsg: ChatMessage = { id: `${Date.now()}-user`, role: "user", content: text };
+    const userMsg: ChatMessage = { id: `${Date.now()}-user`, role: "user", content: text, channel: "chat" };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsTyping(true);
@@ -292,6 +296,42 @@ export const ChatScreen = ({ initialMessage, onBack, onOpenDashboard }: ChatScre
       setMessages((prev) => [...prev, response]);
     } catch {
       setMessages((prev) => [...prev, { ...FALLBACK_RESPONSE, id: `${Date.now()}` }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handleSimulateWhatsApp = async (text: string) => {
+    const messageText = text.trim() || "me fala do Flamengo";
+    const userMsg: ChatMessage = {
+      id: `${Date.now()}-wa-user`,
+      role: "user",
+      content: `Simulacao WhatsApp: ${messageText}`,
+      channel: "whatsapp",
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    setIsTyping(true);
+
+    try {
+      const { data } = await postJsonWithFallback<ChatApiResponse>("/webhook/whatsapp/test", {
+        message: messageText,
+        user_profile: "iniciante",
+      });
+      const response = buildAssistantMessage(data);
+      setMessages((prev) => [...prev, response]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          ...FALLBACK_RESPONSE,
+          id: `${Date.now()}-wa-fallback`,
+          channel: "whatsapp",
+          content:
+            "A simulacao do WhatsApp nao respondeu agora. O fluxo principal do chat continua online para a demo.",
+        },
+      ]);
     } finally {
       setIsTyping(false);
     }
@@ -439,9 +479,16 @@ export const ChatScreen = ({ initialMessage, onBack, onOpenDashboard }: ChatScre
                   }`}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ul]:ml-4 [&_strong]:text-white [&_li]:text-[#d1d7db]">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    </div>
+                    <>
+                      {msg.channel === "whatsapp" ? (
+                        <div className="mb-2 inline-flex rounded-full border border-[#25d366]/25 bg-[#0f2d27] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7df0c0]">
+                          Simulacao WhatsApp
+                        </div>
+                      ) : null}
+                      <div className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ul]:ml-4 [&_strong]:text-white [&_li]:text-[#d1d7db]">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+                    </>
                   ) : (
                     msg.content
                   )}
@@ -527,8 +574,15 @@ export const ChatScreen = ({ initialMessage, onBack, onOpenDashboard }: ChatScre
         <div className="mb-3 flex flex-wrap gap-2">
           <WhatsAppCTA
             label="Ir para o WhatsApp"
-            message="Oi! Estou no chat do Gênio do Futebol e quero continuar meu atendimento no WhatsApp."
+            message="Sou o Genio do Futebol. Acompanhe sua analise aqui."
           />
+          <button
+            onClick={() => !isTyping && void handleSimulateWhatsApp(input)}
+            disabled={isTyping}
+            className="rounded-full border border-[#1f6f5c] bg-[#0f2d27] px-4 py-2 text-xs font-semibold text-[#7df0c0] transition-colors hover:bg-[#143a32] disabled:opacity-40"
+          >
+            Simular WhatsApp
+          </button>
         </div>
         <div className="mb-3 flex items-center gap-2 rounded-2xl border border-[#1f3d34] bg-[#0f2d27] px-3 py-2 text-xs text-[#c0d0cf]">
           <button

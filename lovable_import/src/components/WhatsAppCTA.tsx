@@ -7,7 +7,7 @@ interface WhatsAppCTAProps {
 const WHATSAPP_NUMBER = (import.meta.env.VITE_WHATSAPP_NUMBER || "5581985771955").replace(/\D/g, "");
 const DEFAULT_MESSAGE =
   import.meta.env.VITE_WHATSAPP_MESSAGE ||
-  "Oi! Vim pelo Gênio do Futebol e quero ajuda para analisar jogos do Brasileirao.";
+  "Sou o Genio do Futebol. Acompanhe sua analise aqui.";
 
 function buildWhatsAppUrl(message?: string) {
   if (!WHATSAPP_NUMBER) {
