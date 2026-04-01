@@ -1291,6 +1291,7 @@ def _build_live_feed_context():
     context = {
         "live_matches": [],
         "upcoming_matches": [],
+        "recent_results": [],
         "friendlies_or_world_cup": [],
     }
 
@@ -1314,6 +1315,22 @@ def _build_live_feed_context():
         ][:5]
     except Exception as exc:
         context["upcoming_error"] = str(exc)
+
+    try:
+        ended_events = get_ended_football_events(page=1)
+        recent_rows = _build_event_feed_rows(ended_events, limit=8)
+        context["recent_results"] = recent_rows
+        if not context["friendlies_or_world_cup"]:
+            context["friendlies_or_world_cup"] = [
+                row
+                for row in recent_rows
+                if any(
+                    marker in row["league"].lower()
+                    for marker in ["world cup", "copa do mundo", "friendly", "amistoso", "fifa"]
+                )
+            ][:5]
+    except Exception as exc:
+        context["recent_results_error"] = str(exc)
 
     return context
 
@@ -1346,8 +1363,11 @@ def _build_chat_context_payload(message: str, event_id: Optional[str], user_prof
     teams = find_brasileirao_teams_in_message(message)
     team_name = find_brasileirao_team_in_message(message)
     overview = _load_brasileirao_overview()
+    now = datetime.now()
     payload = {
         "message": message,
+        "current_datetime": now.isoformat(timespec="seconds"),
+        "current_date_br": now.strftime("%d/%m/%Y"),
         "intent": intent,
         "user_profile": user_profile,
         "team_detected": team_name,
@@ -1355,6 +1375,9 @@ def _build_chat_context_payload(message: str, event_id: Optional[str], user_prof
         "table_context": _load_brasileirao_table(),
         "overview": overview,
         "live_feed": _build_live_feed_context(),
+        "competition_status": {
+            "brasileirao_offday": _is_brasileirao_offday(),
+        },
         "training_summary": {
             "data_source": DATA_SOURCE,
             "markets_available": list(MARKET_TARGETS.keys()) + ["goal_next_10m", "card_next_10m", "penalty_in_match"],
